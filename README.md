@@ -3,6 +3,8 @@ Per-master grids for Glyphs.app
 
 MasterGrid lets you set a grid that is not applied globally like the grid you can set in the font info, but per master.
 
+<img src="Images/screenshot.png" width="539" height="599" alt="">
+
 Activate the grid display via the menu ‘View > Show Master Grid’. The grid is just a visual guide, it is not used for snapping.
 
 Set or delete the grid for the current master via the menu ‘Edit > Master Grid…’ (you need to have the `vanilla` module installed to be able to display the dialog).
