@@ -241,6 +241,39 @@ class MasterGrid(ReporterPlugin):
 				NSPoint(max_x, y)
 			)
 
+		#NSBezierPath.setDefaultLineWidth_(1.0/self.getScale())
+		s = int(round(12.0 / self.getScale()))
+		s2 = s * 0.25
+		sel = int(round(13.0 / self.getScale()))
+
+		for p in layer.paths:
+			for n in p.nodes:
+				if n.type != OFFCURVE:
+					x = n.position.x
+					y = n.position.y
+					if n.selected:
+						s1 = sel
+					else:
+						s1 = s
+					if x!= 0 and abs(x % gx) < 1:
+						NSBezierPath.strokeLineFromPoint_toPoint_(
+							NSPoint(x - s2, y - s1),
+							NSPoint(x - s2, y + s1)
+						)
+						NSBezierPath.strokeLineFromPoint_toPoint_(
+							NSPoint(x + s2, y - s1),
+							NSPoint(x + s2, y + s1)
+						)
+					if y != 0 and abs(y % gy) < 1:
+						NSBezierPath.strokeLineFromPoint_toPoint_(
+							NSPoint(x - s1, y - s2),
+							NSPoint(x + s1, y - s2)
+						)
+						NSBezierPath.strokeLineFromPoint_toPoint_(
+							NSPoint(x - s1, y + s2),
+							NSPoint(x + s1, y + s2)
+						)
+
 
 	def editMasterGrid(self):
 		GridDialog()
