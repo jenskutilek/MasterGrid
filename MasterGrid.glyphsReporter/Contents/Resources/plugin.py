@@ -1,4 +1,5 @@
 # encoding: utf-8
+from __future__ import division
 
 from GlyphsApp.plugins import *
 
@@ -225,26 +226,32 @@ class MasterGrid(ReporterPlugin):
 		NSColor.lightGrayColor().set()
 		NSBezierPath.setDefaultLineWidth_(0.6/self.getScale())
 
-		max_x = int(layer.width // gx + 2) * gx
-		min_y = int(master.descender // gy) * gy
-		max_y = int(master.ascender // gy + 1) * gy
+		max_x = int(layer.width // gx + 2)
+		min_y = int(master.descender // gy)
+		max_y = int(master.ascender // gy + 1)
 		
-		for x in range(-gx, max_x + gx, gx):
+		max_xx = max_x * gx
+		min_yy = min_y * gy
+		max_yy = max_y * gy
+		
+		for x in range(-1, max_x + 1):
+			xx = gx * x
 			NSBezierPath.strokeLineFromPoint_toPoint_(
-				NSPoint(x, min_y),
-				NSPoint(x, max_y)
+				NSPoint(xx, min_yy),
+				NSPoint(xx, max_yy)
 			)
-		
-		for y in range(min_y, max_y + gy, gy):
+
+		for y in range(min_y, max_y + 1):
+			yy = gy * y
 			NSBezierPath.strokeLineFromPoint_toPoint_(
-				NSPoint(-gx, y),
-				NSPoint(max_x, y)
+				NSPoint(-gx,    yy),
+				NSPoint(max_xx, yy)
 			)
 
 		#NSBezierPath.setDefaultLineWidth_(1.0/self.getScale())
-		s = int(round(12.0 / self.getScale()))
+		s = int(round(12 / self.getScale()))
 		s2 = s * 0.25
-		sel = int(round(13.0 / self.getScale()))
+		sel = int(round(13 / self.getScale()))
 
 		for p in layer.paths:
 			for n in p.nodes:
@@ -255,7 +262,7 @@ class MasterGrid(ReporterPlugin):
 						s1 = sel
 					else:
 						s1 = s
-					if x!= 0 and abs(x % gx) < 1:
+					if abs((abs(x) + 1) % gx - 1) < 0.5:
 						NSBezierPath.strokeLineFromPoint_toPoint_(
 							NSPoint(x - s2, y - s1),
 							NSPoint(x - s2, y + s1)
@@ -264,7 +271,7 @@ class MasterGrid(ReporterPlugin):
 							NSPoint(x + s2, y - s1),
 							NSPoint(x + s2, y + s1)
 						)
-					if y != 0 and abs(y % gy) < 1:
+					if abs((abs(y) + 1) % gy - 1) < 0.5:
 						NSBezierPath.strokeLineFromPoint_toPoint_(
 							NSPoint(x - s1, y - s2),
 							NSPoint(x + s1, y - s2)
