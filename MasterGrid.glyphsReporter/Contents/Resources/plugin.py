@@ -210,7 +210,10 @@ class MasterGrid(ReporterPlugin):
 			if tool.isKindOfClass_(NSClassFromString("GlyphsToolText")) or tool.isKindOfClass_(NSClassFromString("GlyphsToolHand")):
 				return
 		
-		master = layer.parent.parent.masters[layer.layerId]
+		try:
+			master = layer.parent.parent.masters[layer.layerId]
+		except KeyError:
+			return
 		if master is None:
 			return
 
