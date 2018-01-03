@@ -1,6 +1,7 @@
 # encoding: utf-8
 from __future__ import division
-
+import objc
+from GlyphsApp import *
 from GlyphsApp.plugins import *
 
 try:
