@@ -4,10 +4,11 @@ import objc
 from GlyphsApp import *
 from GlyphsApp.plugins import *
 
+import imp
 try:
-	import vanilla
+	imp.find_module('vanilla')
 	can_display_ui = True
-except:
+except ImportError:
 	can_display_ui = False
 	print "Please install vanilla to enable UI dialogs for MasterGrid. You can install vanilla through Glyphs > Preferences > Addons > Modules."
 
@@ -67,6 +68,7 @@ def CurrentMaster():
 class GridDialog(object):
 
 	def __init__(self):
+		import vanilla # importing it here delays the loading and speeds up the start of the app (by a few seconds)
 		self.w = vanilla.Window(
 			(300, 160),
 			"Master Grid", 
