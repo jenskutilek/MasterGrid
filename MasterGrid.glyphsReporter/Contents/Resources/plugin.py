@@ -4,15 +4,6 @@ import objc
 from GlyphsApp import *
 from GlyphsApp.plugins import *
 
-import imp
-try:
-	imp.find_module('vanilla')
-	can_display_ui = True
-except ImportError:
-	can_display_ui = False
-	print "Please install vanilla to enable UI dialogs for MasterGrid. You can install vanilla through Glyphs > Preferences > Addons > Modules."
-
-
 plugin_id = "de.kutilek.MasterGrid"
 
 
@@ -68,7 +59,17 @@ def CurrentMaster():
 class GridDialog(object):
 
 	def __init__(self):
-		import vanilla # importing it here delays the loading and speeds up the start of the app (by a few seconds)
+		try:
+			import vanilla
+			can_display_ui = True
+		except ImportError:
+			if not self.vanilla_alerted:
+				print("Please install vanilla to enable UI dialogs for RedArrow. You can install vanilla through Glyphs > Preferences > Addons > Modules.")
+				self.vanilla_alerted = True
+				can_display_ui = False
+		if not can_display_ui:
+			return
+		
 		self.w = vanilla.Window(
 			(300, 160),
 			"Master Grid", 
@@ -187,20 +188,20 @@ class MasterGrid(ReporterPlugin):
 
 
 	def start(self):
-		if can_display_ui:
-			mainMenu = NSApplication.sharedApplication().mainMenu()
-			s = objc.selector(self.editMasterGrid,signature='v@:')
-			newMenuItem = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
-				Glyphs.localize({
-					'en': u"Master Grid…",
-					'de': u'Master-Raster…'
-				}),
-				s,
-				""
-			)
-			newMenuItem.setTarget_(self)
-			submenu = mainMenu.itemAtIndex_(2).submenu()
-			submenu.insertItem_atIndex_(newMenuItem, submenu.numberOfItems())
+		mainMenu = NSApplication.sharedApplication().mainMenu()
+		s = objc.selector(self.editMasterGrid,signature='v@:')
+		newMenuItem = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
+			Glyphs.localize({
+				'en': u"Master Grid…",
+				'de': u'Master-Raster…'
+			}),
+			s,
+			""
+		)
+		newMenuItem.setTarget_(self)
+		submenu = mainMenu.itemAtIndex_(2).submenu()
+		submenu.insertItem_atIndex_(newMenuItem, submenu.numberOfItems())
+		self.vanilla_alerted = False
 
 		
 	def background(self, layer):
