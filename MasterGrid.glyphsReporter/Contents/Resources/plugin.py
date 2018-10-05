@@ -64,10 +64,10 @@ class GridDialog(object):
 			can_display_ui = True
 		except ImportError:
 			if not self.vanilla_alerted:
-				print("Please install vanilla to enable UI dialogs for RedArrow. You can install vanilla through Glyphs > Preferences > Addons > Modules.")
 				self.vanilla_alerted = True
 				can_display_ui = False
 		if not can_display_ui:
+				Message(message="Please install vanilla to enable UI dialogs for Master Grid. You can install vanilla through Glyphs > Preferences > Addons > Modules.", title="Missing Module")
 			return
 		
 		self.w = vanilla.Window(
