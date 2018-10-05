@@ -6,8 +6,7 @@ from GlyphsApp.plugins import *
 
 plugin_id = "de.kutilek.MasterGrid"
 
-
-
+can_display_ui = True
 
 def getGrid(master):
 	grid = master.userData["%s.value" % plugin_id]
@@ -59,15 +58,14 @@ def CurrentMaster():
 class GridDialog(object):
 
 	def __init__(self):
+		global can_display_ui
+		if not can_display_ui:
+			return
 		try:
 			import vanilla
-			can_display_ui = True
 		except ImportError:
-			if not self.vanilla_alerted:
-				self.vanilla_alerted = True
-				can_display_ui = False
-		if not can_display_ui:
-				Message(message="Please install vanilla to enable UI dialogs for Master Grid. You can install vanilla through Glyphs > Preferences > Addons > Modules.", title="Missing Module")
+			Message(message="Please install vanilla to enable UI dialogs for Master Grid. You can install vanilla through Glyphs > Preferences > Addons > Modules.", title="Missing Module")
+			can_display_ui = False
 			return
 		
 		self.w = vanilla.Window(
@@ -201,7 +199,6 @@ class MasterGrid(ReporterPlugin):
 		newMenuItem.setTarget_(self)
 		submenu = mainMenu.itemAtIndex_(2).submenu()
 		submenu.insertItem_atIndex_(newMenuItem, submenu.numberOfItems())
-		self.vanilla_alerted = False
 
 		
 	def background(self, layer):
