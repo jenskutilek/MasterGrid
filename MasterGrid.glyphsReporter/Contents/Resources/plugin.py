@@ -6,8 +6,7 @@ from GlyphsApp.plugins import *
 
 plugin_id = "de.kutilek.MasterGrid"
 
-
-
+can_display_ui = True
 
 def getGrid(master):
 	grid = master.userData["%s.value" % plugin_id]
@@ -59,25 +58,24 @@ def CurrentMaster():
 class GridDialog(object):
 
 	def __init__(self):
+		global can_display_ui
+		if not can_display_ui:
+			return
 		try:
 			import vanilla
-			can_display_ui = True
 		except ImportError:
-			if not self.vanilla_alerted:
-				print("Please install vanilla to enable UI dialogs for RedArrow. You can install vanilla through Glyphs > Preferences > Addons > Modules.")
-				self.vanilla_alerted = True
-				can_display_ui = False
-		if not can_display_ui:
+			Message(message="Please install vanilla to enable UI dialogs for Master Grid. You can install vanilla through Glyphs > Preferences > Addons > Modules.", title="Missing Module")
+			can_display_ui = False
 			return
 		
 		self.w = vanilla.Window(
-			(300, 160),
+			(220, 160),
 			"Master Grid", 
 		)
 		y = 8
-		self.w.master_name = vanilla.TextBox((8, y, -8, 17), "Set local grid for master: None")
+		self.w.master_name = vanilla.TextBox((8, y, -8, 35), "Set local grid for master:\nNone")
 		
-		y += 28
+		y += 46
 		x = 8
 		self.w.label_x = vanilla.TextBox((x, y, 30, 17), "X:")
 		self.w.x = vanilla.EditText((x + 22, y-3, 40, 24))
@@ -85,7 +83,7 @@ class GridDialog(object):
 		self.w.label_y = vanilla.TextBox((x, y, 30, 17), "Y:")
 		self.w.y = vanilla.EditText((x + 22, y-3, 40, 24))
 		
-		y += 32
+		y += 28
 		self.w.grid_type_label = vanilla.TextBox((8, y, 66, 17), "Grid is in:")
 		self.w.grid_type = vanilla.RadioGroup(
 			(74, y, -8, 40),
@@ -93,18 +91,13 @@ class GridDialog(object):
 			isVertical = True,
 		)
 		
-		self.w.button_cancel = vanilla.Button(
-			(-272, -30, -204, -10),
-			"Cancel",
-			callback=self.callback_cancel,
-		)
 		self.w.button_delete = vanilla.Button(
-			(-196, -30, -92, -10),
+			(10, -30, 102, -10),
 			"Remove Grid",
 			callback=self.callback_delete,
 		)
 		self.w.button_set = vanilla.Button(
-			(-84, -30, -8, -10),
+			(118, -30, 74, -10),
 			"Set Grid",
 			callback=self.callback_set,
 		)
@@ -116,7 +109,7 @@ class GridDialog(object):
 	def update(self):
 		self.master = CurrentMaster()
 		if self.master is None:
-			self.w.master_name.set("Set local grid for master: None")
+			self.w.master_name.set("Set local grid for master:\nNone")
 			self.w.x.set("0")
 			self.w.y.set("0")
 			
@@ -126,7 +119,7 @@ class GridDialog(object):
 			self.w.button_delete.enable(False)
 			self.w.button_set.enable(False)
 		else:
-			self.w.master_name.set("Set local grid for master: %s" % self.master.name)
+			self.w.master_name.set("Set local grid for master:\n" + self.master.name)
 			gx, gy, grid_type = getGrid(self.master)
 			self.w.x.set(gx)
 			self.w.y.set(gy)
@@ -201,7 +194,6 @@ class MasterGrid(ReporterPlugin):
 		newMenuItem.setTarget_(self)
 		submenu = mainMenu.itemAtIndex_(2).submenu()
 		submenu.insertItem_atIndex_(newMenuItem, submenu.numberOfItems())
-		self.vanilla_alerted = False
 
 		
 	def background(self, layer):
