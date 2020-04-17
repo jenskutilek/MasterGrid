@@ -8,6 +8,7 @@ plugin_id = "de.kutilek.MasterGrid"
 
 can_display_ui = True
 
+
 def getGrid(master):
     grid = master.userData["%s.value" % plugin_id]
     if grid is not None:
@@ -54,7 +55,6 @@ def CurrentMaster():
     return master
 
 
-
 class GridDialog(object):
 
     def __init__(self):
@@ -67,14 +67,14 @@ class GridDialog(object):
             Message(message="Please install vanilla to enable UI dialogs for Master Grid. You can install vanilla through Glyphs > Preferences > Addons > Modules.", title="Missing Module")
             can_display_ui = False
             return
-        
+
         self.w = vanilla.Window(
             (220, 160),
             "Master Grid", 
         )
         y = 8
         self.w.master_name = vanilla.TextBox((8, y, -8, 35), "Set local grid for master:\nNone")
-        
+
         y += 46
         x = 8
         self.w.label_x = vanilla.TextBox((x, y, 30, 17), "X:")
@@ -82,7 +82,7 @@ class GridDialog(object):
         x = 88
         self.w.label_y = vanilla.TextBox((x, y, 30, 17), "Y:")
         self.w.y = vanilla.EditText((x + 22, y-3, 40, 24))
-        
+
         y += 28
         self.w.grid_type_label = vanilla.TextBox((8, y, 66, 17), "Grid is in:")
         self.w.grid_type = vanilla.RadioGroup(
@@ -90,7 +90,7 @@ class GridDialog(object):
             ["Absolute font units", "UPM subdivision"],
             isVertical = True,
         )
-        
+
         self.w.button_delete = vanilla.Button(
             (10, -30, 102, -10),
             "Remove Grid",
@@ -104,15 +104,14 @@ class GridDialog(object):
         self.update()
         self.w.open()
         self.w.makeKey()
-    
-    
+
     def update(self):
         self.master = CurrentMaster()
         if self.master is None:
             self.w.master_name.set("Set local grid for master:\nNone")
             self.w.x.set("0")
             self.w.y.set("0")
-            
+
             self.w.x.enable(False)
             self.w.y.enable(False)
             self.w.grid_type.enable(False)
@@ -127,23 +126,20 @@ class GridDialog(object):
                 self.w.grid_type.set(1)
             else:
                 self.w.grid_type.set(0)
-            
+
             self.w.x.enable(True)
             self.w.y.enable(True)
             self.w.grid_type.enable(True)
             self.w.button_delete.enable(True)
             self.w.button_set.enable(True)
-        
-    
+
     def callback_cancel(self, info):
         self.w.close()
-    
-    
+
     def callback_delete(self, info):
         deleteGrid(self.master)
         self.w.close()
-    
-    
+
     def callback_set(self, info):
         gx = self.w.x.get()
         gy = self.w.y.get()
@@ -172,14 +168,16 @@ class GridDialog(object):
         self.w.close()
 
 
-
-
 class MasterGrid(ReporterPlugin):
 
+    @objc.python_method
     def settings(self):
-        self.menuName = Glyphs.localize({'en': u'Master Grid', 'de': u'Master-Raster'})
+        self.menuName = Glyphs.localize({
+            'en': u'Master Grid',
+            'de': u'Master-Raster'
+        })
 
-
+    @objc.python_method
     def start(self):
         mainMenu = NSApplication.sharedApplication().mainMenu()
         s = objc.selector(self.editMasterGrid,signature='v@:')
@@ -195,17 +193,17 @@ class MasterGrid(ReporterPlugin):
         submenu = mainMenu.itemAtIndex_(2).submenu()
         submenu.insertItem_atIndex_(newMenuItem, submenu.numberOfItems())
 
-        
+    @objc.python_method
     def background(self, layer):
 
         # Check if the grid should be drawn
-        
+
         currentController = self.controller.view().window().windowController()
         if currentController:
             tool = currentController.toolDrawDelegate()
             if tool.isKindOfClass_(NSClassFromString("GlyphsToolText")) or tool.isKindOfClass_(NSClassFromString("GlyphsToolHand")):
                 return
-        
+
         try:
             master = layer.parent.parent.masters[layer.layerId]
         except KeyError:
@@ -228,11 +226,11 @@ class MasterGrid(ReporterPlugin):
         max_x = int(layer.width // gx + 2)
         min_y = int(master.descender // gy)
         max_y = int(master.ascender // gy + 1)
-        
+
         max_xx = max_x * gx
         min_yy = min_y * gy
         max_yy = max_y * gy
-        
+
         for x in range(-1, max_x + 1):
             xx = gx * x
             NSBezierPath.strokeLineFromPoint_toPoint_(
@@ -247,7 +245,7 @@ class MasterGrid(ReporterPlugin):
                 NSPoint(max_xx, yy)
             )
 
-        #NSBezierPath.setDefaultLineWidth_(1.0/self.getScale())
+        # NSBezierPath.setDefaultLineWidth_(1.0/self.getScale())
         s = int(round(12 / self.getScale()))
         s2 = s * 0.25
         sel = int(round(13 / self.getScale()))
@@ -280,6 +278,6 @@ class MasterGrid(ReporterPlugin):
                             NSPoint(x + s1, y + s2)
                         )
 
-
+    @objc.python_method
     def editMasterGrid(self):
         GridDialog()
