@@ -196,7 +196,7 @@ class MasterGrid(ReporterPlugin):
     @objc.python_method
     def start(self):
         mainMenu = NSApplication.sharedApplication().mainMenu()
-        s = objc.selector(self.editMasterGrid, signature='v@:')
+        s = objc.selector(self.editMasterGrid, signature=b'v@:@')
         newMenuItem = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
             Glyphs.localize({
                 'en': u"Master Grid…",
@@ -297,6 +297,5 @@ class MasterGrid(ReporterPlugin):
                             NSPoint(x + s1, y + s2)
                         )
 
-    @objc.python_method
     def editMasterGrid(self):
         GridDialog()
