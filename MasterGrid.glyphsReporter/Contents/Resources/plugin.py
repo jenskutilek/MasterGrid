@@ -1,8 +1,12 @@
 # encoding: utf-8
-from __future__ import division
+from __future__ import division, print_function, unicode_literals
+
 import objc
-from GlyphsApp import *
-from GlyphsApp.plugins import *
+
+from AppKit import NSApplication, NSBezierPath, NSClassFromString, NSColor, \
+    NSMenuItem, NSPoint
+from GlyphsApp import Glyphs, Message, OFFCURVE
+from GlyphsApp.plugins import ReporterPlugin
 
 plugin_id = "de.kutilek.MasterGrid"
 
