@@ -64,16 +64,26 @@ class GridDialog(object):
         try:
             import vanilla
         except ImportError:
-            Message(message="Please install vanilla to enable UI dialogs for Master Grid. You can install vanilla through Glyphs > Preferences > Addons > Modules.", title="Missing Module")
+            Message(
+                message=(
+                    "Please install vanilla to enable UI dialogs for "
+                    "Master Grid. You can install vanilla through "
+                    "Glyphs > Preferences > Addons > Modules."
+                ),
+                title="Missing Module"
+            )
             can_display_ui = False
             return
 
         self.w = vanilla.Window(
             (220, 160),
-            "Master Grid", 
+            "Master Grid",
         )
         y = 8
-        self.w.master_name = vanilla.TextBox((8, y, -8, 35), "Set local grid for master:\nNone")
+        self.w.master_name = vanilla.TextBox(
+            (8, y, -8, 35),
+            "Set local grid for master:\nNone"
+        )
 
         y += 46
         x = 8
@@ -88,7 +98,7 @@ class GridDialog(object):
         self.w.grid_type = vanilla.RadioGroup(
             (74, y, -8, 40),
             ["Absolute font units", "UPM subdivision"],
-            isVertical = True,
+            isVertical=True,
         )
 
         self.w.button_delete = vanilla.Button(
@@ -118,7 +128,9 @@ class GridDialog(object):
             self.w.button_delete.enable(False)
             self.w.button_set.enable(False)
         else:
-            self.w.master_name.set("Set local grid for master:\n" + self.master.name)
+            self.w.master_name.set(
+                "Set local grid for master:\n" + self.master.name
+            )
             gx, gy, grid_type = getGrid(self.master)
             self.w.x.set(gx)
             self.w.y.set(gy)
@@ -154,7 +166,7 @@ class GridDialog(object):
             gxf = float(gx)
             gyf = float(gy)
         except ValueError:
-            print "Please enter a floating point number or an integer number."
+            print("Please enter a floating point number or an integer number.")
             return
         if gxf == gxi:
             gx = gxi
@@ -180,7 +192,7 @@ class MasterGrid(ReporterPlugin):
     @objc.python_method
     def start(self):
         mainMenu = NSApplication.sharedApplication().mainMenu()
-        s = objc.selector(self.editMasterGrid,signature='v@:')
+        s = objc.selector(self.editMasterGrid, signature='v@:')
         newMenuItem = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
             Glyphs.localize({
                 'en': u"Master Grid…",
@@ -201,7 +213,10 @@ class MasterGrid(ReporterPlugin):
         currentController = self.controller.view().window().windowController()
         if currentController:
             tool = currentController.toolDrawDelegate()
-            if tool.isKindOfClass_(NSClassFromString("GlyphsToolText")) or tool.isKindOfClass_(NSClassFromString("GlyphsToolHand")):
+            if (
+                tool.isKindOfClass_(NSClassFromString("GlyphsToolText"))
+                or tool.isKindOfClass_(NSClassFromString("GlyphsToolHand"))
+            ):
                 return
 
         try:
