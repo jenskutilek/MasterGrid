@@ -189,8 +189,8 @@ class MasterGrid(ReporterPlugin):
     @objc.python_method
     def settings(self):
         self.menuName = Glyphs.localize({
-            'en': u'Master Grid',
-            'de': u'Master-Raster'
+            'en': 'Master Grid',
+            'de': 'Master-Raster'
         })
 
     @objc.python_method
@@ -199,8 +199,8 @@ class MasterGrid(ReporterPlugin):
         s = objc.selector(self.editMasterGrid, signature=b'v@:@')
         newMenuItem = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
             Glyphs.localize({
-                'en': u"Master Grid…",
-                'de': u'Master-Raster…'
+                'en': "Master Grid…",
+                'de': 'Master-Raster…'
             }),
             s,
             ""

@@ -13,9 +13,9 @@
 	<key>CFBundleName</key>
 	<string>MasterGrid</string>
 	<key>CFBundleVersion</key>
-	<string>8</string>
+	<string>9</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.3.1</string>
+	<string>0.3.2</string>
 	<key>UpdateFeedURL</key>
 	<string>https://raw.githubusercontent.com/jenskutilek/MasterGrid/master/MasterGrid.glyphsReporter/Contents/Info.plist</string>
 	<key>productPageURL</key>
