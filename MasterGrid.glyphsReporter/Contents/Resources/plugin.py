@@ -52,7 +52,7 @@ def deleteGrid(master):
 
 def CurrentMaster():
     font = NSApplication.sharedApplication().font
-    if font is None:
+    if font is None or font.selectedLayers is None:
         return None
     layer = font.selectedLayers[0]
     master = layer.parent.parent.masters[layer.layerId]
