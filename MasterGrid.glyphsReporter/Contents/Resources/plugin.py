@@ -207,7 +207,7 @@ class MasterGrid(ReporterPlugin):
         )
         newMenuItem.setTarget_(self)
         submenu = mainMenu.itemAtIndex_(2).submenu()
-        submenu.insertItem_atIndex_(newMenuItem, submenu.numberOfItems())
+        submenu.insertItem_atIndex_(newMenuItem, 12)
 
     @objc.python_method
     def background(self, layer):
