@@ -4,7 +4,7 @@ from __future__ import division, print_function, unicode_literals
 import objc
 
 from AppKit import NSApplication, NSBezierPath, NSClassFromString, NSColor, \
-    NSMenuItem, NSPoint
+    NSMenuItem, NSPoint, NSNotificationCenter
 from GlyphsApp import Glyphs, Message, OFFCURVE
 from GlyphsApp.plugins import ReporterPlugin
 
@@ -52,7 +52,7 @@ def deleteGrid(master):
 
 def CurrentMaster():
     font = NSApplication.sharedApplication().font
-    if font is None:
+    if font is None or font.selectedLayers is None:
         return None
     layer = font.selectedLayers[0]
     master = layer.parent.parent.masters[layer.layerId]
@@ -182,7 +182,7 @@ class GridDialog(object):
             gy = gyf
         setGrid(self.master, gx, gy, grid_type)
         self.w.close()
-
+        NSNotificationCenter.defaultCenter().postNotificationName_object_("GSRedrawEditView", None)
 
 class MasterGrid(ReporterPlugin):
 
