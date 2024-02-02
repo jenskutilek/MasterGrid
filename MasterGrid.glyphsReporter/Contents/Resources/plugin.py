@@ -224,8 +224,8 @@ class MasterGrid(ReporterPlugin):
                 return
 
         try:
-            master = layer.parent.parent.masters[layer.layerId]
-        except KeyError:
+            master = layer.master
+        except:
             return
         if master is None:
             return
