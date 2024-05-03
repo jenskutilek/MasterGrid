@@ -205,6 +205,9 @@ class MasterGrid(ReporterPlugin):
         newMenuItem.setTarget_(self)
         submenu = mainMenu.itemAtIndex_(2).submenu()
         submenu.insertItem_atIndex_(newMenuItem, 12)
+        self.grid_color = Glyphs.defaults.get(
+            "%s.color" % plugin_id, (0.0, 0.0, 0.0, 0.1)
+        )
 
     @objc.python_method
     def background(self, layer):
@@ -234,7 +237,7 @@ class MasterGrid(ReporterPlugin):
             gx = upm / gx
             gy = upm / gy
 
-        NSColor.lightGrayColor().set()
+        NSColor.colorWithCalibratedRed_green_blue_alpha_(*self.grid_color).set()
         NSBezierPath.setDefaultLineWidth_(0.6 / self.getScale())
 
         max_x = int(layer.width // gx + 2)
