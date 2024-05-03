@@ -3,8 +3,15 @@ from __future__ import division, print_function, unicode_literals
 
 import objc
 
-from AppKit import NSApplication, NSBezierPath, NSClassFromString, NSColor, \
-    NSMenuItem, NSPoint, NSNotificationCenter
+from AppKit import (
+    NSApplication,
+    NSBezierPath,
+    NSClassFromString,
+    NSColor,
+    NSMenuItem,
+    NSPoint,
+    NSNotificationCenter,
+)
 from GlyphsApp import Glyphs, Message, OFFCURVE
 from GlyphsApp.plugins import ReporterPlugin
 
@@ -60,7 +67,6 @@ def CurrentMaster():
 
 
 class GridDialog(object):
-
     def __init__(self):
         global can_display_ui
         if not can_display_ui:
@@ -74,7 +80,7 @@ class GridDialog(object):
                     "Master Grid. You can install vanilla through "
                     "Glyphs > Preferences > Addons > Modules."
                 ),
-                title="Missing Module"
+                title="Missing Module",
             )
             can_display_ui = False
             return
@@ -85,17 +91,16 @@ class GridDialog(object):
         )
         y = 8
         self.w.master_name = vanilla.TextBox(
-            (8, y, -8, 35),
-            "Set local grid for master:\nNone"
+            (8, y, -8, 35), "Set local grid for master:\nNone"
         )
 
         y += 46
         x = 8
         self.w.label_x = vanilla.TextBox((x, y, 30, 17), "X:")
-        self.w.x = vanilla.EditText((x + 22, y-3, 40, 24))
+        self.w.x = vanilla.EditText((x + 22, y - 3, 40, 24))
         x = 88
         self.w.label_y = vanilla.TextBox((x, y, 30, 17), "Y:")
-        self.w.y = vanilla.EditText((x + 22, y-3, 40, 24))
+        self.w.y = vanilla.EditText((x + 22, y - 3, 40, 24))
 
         y += 28
         self.w.grid_type_label = vanilla.TextBox((8, y, 66, 17), "Grid is in:")
@@ -132,9 +137,7 @@ class GridDialog(object):
             self.w.button_delete.enable(False)
             self.w.button_set.enable(False)
         else:
-            self.w.master_name.set(
-                "Set local grid for master:\n" + self.master.name
-            )
+            self.w.master_name.set("Set local grid for master:\n" + self.master.name)
             gx, gy, grid_type = getGrid(self.master)
             self.w.x.set(gx)
             self.w.y.set(gy)
@@ -182,28 +185,22 @@ class GridDialog(object):
             gy = gyf
         setGrid(self.master, gx, gy, grid_type)
         self.w.close()
-        NSNotificationCenter.defaultCenter().postNotificationName_object_("GSRedrawEditView", None)
+        NSNotificationCenter.defaultCenter().postNotificationName_object_(
+            "GSRedrawEditView", None
+        )
+
 
 class MasterGrid(ReporterPlugin):
-
     @objc.python_method
     def settings(self):
-        self.menuName = Glyphs.localize({
-            'en': 'Master Grid',
-            'de': 'Master-Raster'
-        })
+        self.menuName = Glyphs.localize({"en": "Master Grid", "de": "Master-Raster"})
 
     @objc.python_method
     def start(self):
         mainMenu = NSApplication.sharedApplication().mainMenu()
-        s = objc.selector(self.editMasterGrid, signature=b'v@:@')
+        s = objc.selector(self.editMasterGrid, signature=b"v@:@")
         newMenuItem = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
-            Glyphs.localize({
-                'en': "Master Grid…",
-                'de': 'Master-Raster…'
-            }),
-            s,
-            ""
+            Glyphs.localize({"en": "Master Grid…", "de": "Master-Raster…"}), s, ""
         )
         newMenuItem.setTarget_(self)
         submenu = mainMenu.itemAtIndex_(2).submenu()
@@ -211,21 +208,19 @@ class MasterGrid(ReporterPlugin):
 
     @objc.python_method
     def background(self, layer):
-
         # Check if the grid should be drawn
 
         currentController = self.controller.view().window().windowController()
         if currentController:
             tool = currentController.toolDrawDelegate()
-            if (
-                tool.isKindOfClass_(NSClassFromString("GlyphsToolText"))
-                or tool.isKindOfClass_(NSClassFromString("GlyphsToolHand"))
-            ):
+            if tool.isKindOfClass_(
+                NSClassFromString("GlyphsToolText")
+            ) or tool.isKindOfClass_(NSClassFromString("GlyphsToolHand")):
                 return
 
         try:
             master = layer.master
-        except:
+        except:  # noqa: E722
             return
         if master is None:
             return
@@ -240,7 +235,7 @@ class MasterGrid(ReporterPlugin):
             gy = upm / gy
 
         NSColor.lightGrayColor().set()
-        NSBezierPath.setDefaultLineWidth_(0.6/self.getScale())
+        NSBezierPath.setDefaultLineWidth_(0.6 / self.getScale())
 
         max_x = int(layer.width // gx + 2)
         min_y = int(master.descender // gy)
@@ -253,15 +248,13 @@ class MasterGrid(ReporterPlugin):
         for x in range(-1, max_x + 1):
             xx = gx * x
             NSBezierPath.strokeLineFromPoint_toPoint_(
-                NSPoint(xx, min_yy),
-                NSPoint(xx, max_yy)
+                NSPoint(xx, min_yy), NSPoint(xx, max_yy)
             )
 
         for y in range(min_y, max_y + 1):
             yy = gy * y
             NSBezierPath.strokeLineFromPoint_toPoint_(
-                NSPoint(-gx,    yy),
-                NSPoint(max_xx, yy)
+                NSPoint(-gx, yy), NSPoint(max_xx, yy)
             )
 
         # NSBezierPath.setDefaultLineWidth_(1.0/self.getScale())
@@ -280,21 +273,17 @@ class MasterGrid(ReporterPlugin):
                         s1 = s
                     if abs((abs(x) + 1) % gx - 1) < 0.5:
                         NSBezierPath.strokeLineFromPoint_toPoint_(
-                            NSPoint(x - s2, y - s1),
-                            NSPoint(x - s2, y + s1)
+                            NSPoint(x - s2, y - s1), NSPoint(x - s2, y + s1)
                         )
                         NSBezierPath.strokeLineFromPoint_toPoint_(
-                            NSPoint(x + s2, y - s1),
-                            NSPoint(x + s2, y + s1)
+                            NSPoint(x + s2, y - s1), NSPoint(x + s2, y + s1)
                         )
                     if abs((abs(y) + 1) % gy - 1) < 0.5:
                         NSBezierPath.strokeLineFromPoint_toPoint_(
-                            NSPoint(x - s1, y - s2),
-                            NSPoint(x + s1, y - s2)
+                            NSPoint(x - s1, y - s2), NSPoint(x + s1, y - s2)
                         )
                         NSBezierPath.strokeLineFromPoint_toPoint_(
-                            NSPoint(x - s1, y + s2),
-                            NSPoint(x + s1, y + s2)
+                            NSPoint(x - s1, y + s2), NSPoint(x + s1, y + s2)
                         )
 
     def editMasterGrid(self):
