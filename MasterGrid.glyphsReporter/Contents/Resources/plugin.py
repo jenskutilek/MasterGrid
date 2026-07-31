@@ -206,7 +206,7 @@ class MasterGrid(ReporterPlugin):
         )
         newMenuItem.setTarget_(self)
         submenu = mainMenu.itemAtIndex_(2).submenu()
-        submenu.insertItem_atIndex_(newMenuItem, 26)
+        submenu.addItem_(newMenuItem)
         self.grid_color = Glyphs.defaults.get(KEY_GRID_COLOR, (0.0, 0.0, 0.0, 0.1))
         self.marker_color = Glyphs.defaults.get(KEY_MARKER_COLOR, (0.0, 0.0, 0.0, 0.25))
 
