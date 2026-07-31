@@ -1,4 +1,5 @@
 # MasterGrid
+
 Per-master grids for Glyphs.app
 
 MasterGrid lets you set a grid that is not applied globally like the grid you can set in the font info, but per master.
@@ -15,6 +16,7 @@ If you don’t want to install `vanilla`, you can still set the grid via the Mac
 Font.masters[0].userData["de.kutilek.MasterGrid.value"] = [100, 100] # x, y
 Font.masters[0].userData["de.kutilek.MasterGrid.type"]  = "units"    # absolute font units
 ```
+
 You can also use relative subdivisions of the units per em value:
 
 ```python

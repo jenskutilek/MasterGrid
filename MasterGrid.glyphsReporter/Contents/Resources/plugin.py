@@ -2,17 +2,16 @@
 from __future__ import division, print_function, unicode_literals
 
 import objc
-
 from AppKit import (
     NSApplication,
     NSBezierPath,
     NSClassFromString,
     NSColor,
     NSMenuItem,
-    NSPoint,
     NSNotificationCenter,
+    NSPoint,
 )
-from GlyphsApp import Glyphs, Message, OFFCURVE
+from GlyphsApp import OFFCURVE, Glyphs, Message
 from GlyphsApp.plugins import ReporterPlugin
 
 plugin_id = "de.kutilek.MasterGrid"
