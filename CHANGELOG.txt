@@ -1,0 +1,11 @@
+v0.4.0
+- Tweak grid drawing area
+- Use separate color for on-grid markers
+- Read on-grid marker color from de.kutilek.MasterGrid.markercolor
+- Also check anchors for being on grid
+- Make sure entered numbers are positive
+- Remove Python 2 stuff
+
+v0.3.7
+- Read grid color from de.kutilek.MasterGrid.color
+- Update binary

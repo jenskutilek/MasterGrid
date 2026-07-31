@@ -1,0 +1,76 @@
+name: Build release zip and publish release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+
+permissions: write-all
+
+jobs:
+  build:
+    name: Build release zip
+    runs-on: ubuntu-latest
+    env:
+      # Edit to match the plugin bundle name in the repo root
+      PLUGIN_PATH: MasterGrid.glyphsReporter
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set artifact file name
+        id: zip-name
+        shell: bash
+        run: echo "ZIP_NAME=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')" >> $GITHUB_ENV
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ env.ZIP_NAME }}
+          path: ${{ env.PLUGIN_PATH }}
+
+    outputs:
+      zip_name: ${{ env.ZIP_NAME }}
+      plugin_path: ${{ env.PLUGIN_PATH }}
+
+  release:
+    name: Publish release
+    if: ${{ github.ref_type == 'tag' }}
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PLUGIN_PATH: ${{ needs.build.outputs.plugin_path }}
+      ZIP_NAME: ${{ needs.build.outputs.zip_name }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Get artifacts from CI
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ env.ZIP_NAME }}
+          path: ${{ env.ZIP_NAME }}
+
+      - name: Create zip archive
+        run: |
+          mkdir build
+          mv ${{ env.ZIP_NAME }} build/${{ env.PLUGIN_PATH }}
+          cd build
+          zip -r ${{ env.ZIP_NAME }}.zip ${{ env.PLUGIN_PATH }}
+
+      - name: Generate release notes
+        run: sed -n '/${{github.ref_name}}/,/^$/p' CHANGELOG.txt | sed '1d; $d' > Release_Notes.txt
+
+      - name: Check for release
+        id: create_release
+        run: |
+          if ! gh release view ${{ github.ref_name }}; then
+          cat Release_Notes.txt | gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -F -
+          fi
+
+      - name: Populate release
+        run: gh release upload ${{ github.ref_name }} build/${{ env.ZIP_NAME }}.zip --clobber
+
+      - name: Set release live
+        run: gh release edit ${{ github.ref_name }} --draft=false
