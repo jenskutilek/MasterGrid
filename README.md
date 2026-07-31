@@ -26,8 +26,9 @@ Font.masters[1].userData["de.kutilek.MasterGrid.type"]  = "div"    # subdivision
 
 The resulting grid of the two examples will be the same for a font with 1000 units per em.
 
-To customize the grid color, set it as an RGBA tuple by running this in the Macro Panel:
+To customize the grid and marker colors, set them as an RGBA tuple by running this in the Macro Panel:
 
 ```python
 Glyphs.defaults["de.kutilek.MasterGrid.color"] = (1, 0, 0, 0.2)
+Glyphs.defaults["de.kutilek.MasterGrid.markercolor"] = (1, 0, 0, 0.2)
 ```

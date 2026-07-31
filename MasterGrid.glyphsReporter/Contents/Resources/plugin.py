@@ -13,24 +13,31 @@ from GlyphsApp.plugins import ReporterPlugin
 
 plugin_id = "de.kutilek.MasterGrid"
 
+KEY_GRID_VALUE = f"{plugin_id}.value"
+KEY_GRID_TYPE = f"{plugin_id}.type"
+KEY_GRID_COLOR = f"{plugin_id}.color"
+KEY_MARKER_COLOR = f"{plugin_id}.markercolor"
+
 can_display_ui = True
 
 
-def getGrid(master):
-    grid = master.userData["%s.value" % plugin_id]
+def getGrid(master) -> tuple[int, int, str]:
+    grid = master.userData[KEY_GRID_VALUE]
     if grid is not None:
         gx, gy = grid
     else:
         gx = gy = 0
 
-    grid_type = master.userData["%s.type" % plugin_id]
+    grid_type = master.userData[KEY_GRID_TYPE]
     if grid_type is None:
         grid_type = "units"
 
     return gx, gy, grid_type
 
 
-def setGrid(master, x, y=None, grid_type=None):
+def setGrid(
+    master, x: float | None, y: float | None = None, grid_type: str | None = None
+) -> None:
     if x is None:
         x = 0
     if x == 0:
@@ -38,19 +45,18 @@ def setGrid(master, x, y=None, grid_type=None):
         return
     if y is None:
         y = x
-    master.userData["%s.value" % plugin_id] = [x, y]
+    master.userData[KEY_GRID_VALUE] = [x, y]
     if grid_type is None:
-        if master.userData["%s.type" % plugin_id] is not None:
-            del master.userData["%s.type" % plugin_id]
+        if master.userData[KEY_GRID_TYPE] is not None:
+            del master.userData[KEY_GRID_TYPE]
     else:
-        master.userData["%s.type" % plugin_id] = grid_type
+        master.userData[KEY_GRID_TYPE] = grid_type
 
 
-def deleteGrid(master):
-    for key in ("value", "type"):
-        full_key = "%s.%s" % (plugin_id, key)
-        if master.userData[full_key] is not None:
-            del master.userData[full_key]
+def deleteGrid(master) -> None:
+    for key in (KEY_GRID_VALUE, KEY_GRID_TYPE):
+        if master.userData[key] is not None:
+            del master.userData[key]
 
 
 def CurrentMaster():
@@ -62,8 +68,8 @@ def CurrentMaster():
     return master
 
 
-class GridDialog(object):
-    def __init__(self):
+class GridDialog:
+    def __init__(self) -> None:
         global can_display_ui
         if not can_display_ui:
             return
@@ -74,7 +80,7 @@ class GridDialog(object):
                 message=(
                     "Please install vanilla to enable UI dialogs for "
                     "Master Grid. You can install vanilla through "
-                    "Glyphs > Preferences > Addons > Modules."
+                    "Glyphs > Window > Plugin Manager > Modules."
                 ),
                 title="Missing Module",
             )
@@ -120,7 +126,7 @@ class GridDialog(object):
         self.w.open()
         self.w.makeKey()
 
-    def update(self):
+    def update(self) -> None:
         self.master = CurrentMaster()
         if self.master is None:
             self.w.master_name.set("Set local grid for master:\nNone")
@@ -148,14 +154,14 @@ class GridDialog(object):
             self.w.button_delete.enable(True)
             self.w.button_set.enable(True)
 
-    def callback_cancel(self, info):
+    def callback_cancel(self, info) -> None:
         self.w.close()
 
-    def callback_delete(self, info):
+    def callback_delete(self, info) -> None:
         deleteGrid(self.master)
         self.w.close()
 
-    def callback_set(self, info):
+    def callback_set(self, info) -> None:
         gx = self.w.x.get()
         gy = self.w.y.get()
         grid_type = self.w.grid_type.get()
@@ -201,12 +207,11 @@ class MasterGrid(ReporterPlugin):
         newMenuItem.setTarget_(self)
         submenu = mainMenu.itemAtIndex_(2).submenu()
         submenu.insertItem_atIndex_(newMenuItem, 12)
-        self.grid_color = Glyphs.defaults.get(
-            "%s.color" % plugin_id, (0.0, 0.0, 0.0, 0.1)
-        )
+        self.grid_color = Glyphs.defaults.get(KEY_GRID_COLOR, (0.0, 0.0, 0.0, 0.1))
+        self.marker_color = Glyphs.defaults.get(KEY_MARKER_COLOR, (0.0, 0.0, 0.0, 0.25))
 
     @objc.python_method
-    def background(self, layer):
+    def background(self, layer) -> None:
         # Check if the grid should be drawn
 
         currentController = self.controller.view().window().windowController()
@@ -225,65 +230,109 @@ class MasterGrid(ReporterPlugin):
             return
 
         gx, gy, grid_type = getGrid(master)
-        if gx == 0 or gy == 0:
+        if gx == 0 and gy == 0:
             return
 
+        upm = layer.parent.parent.upm
         if grid_type == "div":
-            upm = layer.parent.parent.upm
-            gx = upm / gx
-            gy = upm / gy
+            if gx != 0:
+                gx = upm / gx
+            if gy != 0:
+                gy = upm / gy
 
         NSColor.colorWithCalibratedRed_green_blue_alpha_(*self.grid_color).set()
         NSBezierPath.setDefaultLineWidth_(0.6 / self.getScale())
 
-        max_x = int(layer.width // gx + 2)
-        min_y = int(master.descender // gy)
-        max_y = int(master.ascender // gy + 1)
+        max_xx = layer.width
+        min_yy = int(layer.descender)
+        max_yy = int(layer.ascender)
 
-        max_xx = max_x * gx
-        min_yy = min_y * gy
-        max_yy = max_y * gy
+        if gy == 0 or gy == upm:
+            min_y = min_yy
+            max_y = max_yy
+        else:
+            min_y = int(layer.descender // gy)
+            max_y = int(layer.ascender // gy + 1)
+            min_yy = min_y * gy
+            max_yy = max_y * gy
 
-        for x in range(-1, max_x + 1):
-            xx = gx * x
+        if gx != 0:
+            max_x = int(layer.width // gx + 1)
+            max_xx = max_x * gx
+
+            for x in range(max_x + 1):
+                xx = gx * x
+                NSBezierPath.strokeLineFromPoint_toPoint_(
+                    NSPoint(xx, min_yy), NSPoint(xx, max_yy)
+                )
+
+        if gy not in (0, upm):
+            for y in range(min_y, max_y + 1):
+                yy = gy * y
+                NSBezierPath.strokeLineFromPoint_toPoint_(
+                    NSPoint(0, yy), NSPoint(max_xx, yy)
+                )
+        else:
             NSBezierPath.strokeLineFromPoint_toPoint_(
-                NSPoint(xx, min_yy), NSPoint(xx, max_yy)
+                NSPoint(0, min_yy), NSPoint(max_xx, min_yy)
+            )
+            NSBezierPath.strokeLineFromPoint_toPoint_(
+                NSPoint(0, max_yy), NSPoint(max_xx, max_yy)
             )
 
-        for y in range(min_y, max_y + 1):
-            yy = gy * y
-            NSBezierPath.strokeLineFromPoint_toPoint_(
-                NSPoint(-gx, yy), NSPoint(max_xx, yy)
-            )
+        # Draw markers for nodes and anchors that are on the grid
 
-        # NSBezierPath.setDefaultLineWidth_(1.0/self.getScale())
-        s = int(round(12 / self.getScale()))
+        s = round(12 / self.getScale())
         s2 = s * 0.25
-        sel = int(round(13 / self.getScale()))
+        sel = round(13 / self.getScale())
+
+        NSColor.colorWithCalibratedRed_green_blue_alpha_(*self.marker_color).set()
 
         for p in layer.paths:
             for n in p.nodes:
                 if n.type != OFFCURVE:
-                    x = n.position.x
-                    y = n.position.y
                     if n.selected:
                         s1 = sel
                     else:
                         s1 = s
-                    if abs((abs(x) + 1) % gx - 1) < 0.5:
-                        NSBezierPath.strokeLineFromPoint_toPoint_(
-                            NSPoint(x - s2, y - s1), NSPoint(x - s2, y + s1)
-                        )
-                        NSBezierPath.strokeLineFromPoint_toPoint_(
-                            NSPoint(x + s2, y - s1), NSPoint(x + s2, y + s1)
-                        )
-                    if abs((abs(y) + 1) % gy - 1) < 0.5:
-                        NSBezierPath.strokeLineFromPoint_toPoint_(
-                            NSPoint(x - s1, y - s2), NSPoint(x + s1, y - s2)
-                        )
-                        NSBezierPath.strokeLineFromPoint_toPoint_(
-                            NSPoint(x - s1, y + s2), NSPoint(x + s1, y + s2)
-                        )
+                    self.drawMarker(n.position.x, n.position.y, s1, s2, gx, gy, upm)
+        for a in layer.anchors:
+            if a.selected:
+                s1 = sel
+            else:
+                s1 = s
+            self.drawMarker(a.position.x, a.position.y, s1, s2, gx, gy, upm)
 
-    def editMasterGrid(self):
+    @objc.python_method
+    def drawMarker(
+        self, x: float, y: float, s1: float, s2: float, gx: float, gy: float, upm: int
+    ) -> None:
+        """
+        If x or y are on the grid, draw a marker.
+
+        Args:
+            x (float): The x coordinate of the point to be checked.
+            y (float): The y coordinate of the point to be checked.
+            s1 (float): The length of the marker in grid direction.
+            s2 (float): The offset of the marker from the point.
+            gx (float): The x grid.
+            gy (float): The y grid.
+            upm (int): The units per em value.
+        """
+        if gx not in (0, upm) and abs((abs(x) + 1) % gx - 1) < 0.5:
+            NSBezierPath.strokeLineFromPoint_toPoint_(
+                NSPoint(x - s2, y - s1), NSPoint(x - s2, y + s1)
+            )
+            NSBezierPath.strokeLineFromPoint_toPoint_(
+                NSPoint(x + s2, y - s1), NSPoint(x + s2, y + s1)
+            )
+        if gy not in (0, upm) and abs((abs(y) + 1) % gy - 1) < 0.5:
+            NSBezierPath.strokeLineFromPoint_toPoint_(
+                NSPoint(x - s1, y - s2), NSPoint(x + s1, y - s2)
+            )
+            NSBezierPath.strokeLineFromPoint_toPoint_(
+                NSPoint(x - s1, y + s2), NSPoint(x + s1, y + s2)
+            )
+
+    def editMasterGrid(self) -> None:
         GridDialog()
