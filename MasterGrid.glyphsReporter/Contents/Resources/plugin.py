@@ -170,10 +170,10 @@ class GridDialog:
         else:
             grid_type = "div"
         try:
-            gxi = int(gx)
-            gyi = int(gy)
-            gxf = float(gx)
-            gyf = float(gy)
+            gxi = abs(int(gx))
+            gyi = abs(int(gy))
+            gxf = abs(float(gx))
+            gyf = abs(float(gy))
         except ValueError:
             print("Please enter a floating point number or an integer number.")
             return
