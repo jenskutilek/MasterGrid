@@ -214,7 +214,9 @@ class MasterGrid(ReporterPlugin):
     def background(self, layer) -> None:
         # Check if the grid should be drawn
 
-        currentController = self.controller.view().window().windowController()
+        currentController = None
+        if self.controller is not None:
+            currentController = self.controller.view().window().windowController()
         if currentController:
             tool = currentController.toolDrawDelegate()
             if tool.isKindOfClass_(
